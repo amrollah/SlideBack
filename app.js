@@ -8,18 +8,19 @@
 // for more info, see: http://expressjs.com
 var express = require('express');
 var passport = require('passport');
-var GoogleStrategy = require('passport-google-oauth20').Strategy;
+//var GoogleStrategy = require('passport-google-oauth20').Strategy;
+var Strategy = require('passport-local').Strategy;
 
 var Sequelize = require('sequelize')
-    , sequelize = new Sequelize('postgres', 'postgres', '1234', {
-    hostname: "us-cdbr-iron-east-03.cleardb.net",
+    , sequelize = new Sequelize('hack', 'postgres', '1111', {
+    hostname: "localhost",
     dialect: "postgres",
     port: 5432
 });
 
 var User = sequelize.define('User', {
     google_id: Sequelize.STRING,
-    name: Sequelize.STRING,
+    username: Sequelize.STRING,
     prof: Sequelize.BOOLEAN
 });
 
@@ -51,8 +52,7 @@ var Feedback = sequelize.define('Feedback', {
 });
 
 //User.create({
-//    google_id: 'John',
-//    name: 'Hancock',
+//    username: 'prof',
 //    prof: true
 //});
 
@@ -61,36 +61,48 @@ var Feedback = sequelize.define('Feedback', {
 //    passcode: '1'
 //});
 
-// JUST run this once to create the db tables
+ //JUST run this once to create the db tables
 //sequelize
 //    .sync({ force: true })
 //    .then(function(err) {
-//        console.log('It worked!');
+//        console.log('jhjh');
 //    }, function (err) {
 //        console.log('An error occurred while creating the table:', err);
 //    });
 
 
+passport.use(new Strategy(
+    function(username, password, cb) {
+        User.findOrCreate({where: {username: username, prof:false}, defaults: {}})
+            .spread(function (user, created) {
+                console.log(user.get({
+                    plain: true
+                }));
+                console.log(created);
+                return cb(null, user);
+            });
+    }));
 
-passport.use(new GoogleStrategy({
-        clientID: "208268578819-cb8dh3s8kmbovano2mino11ecadtocgt.apps.googleusercontent.com",
-        clientSecret: "SltsvprFHefAMuiJgjddUhxU",
-        callbackURL: "http://localhost:6001/auth/google/callback"
-    },
-    function (accessToken, refreshToken, profile, cb) {
-        //console.log(profile);
-        return cb(null, profile);
-        //User
-        //    .findOrCreate({where: {google_id: profile.id, name: profile.displayName, prof: false}, defaults: {}})
-        //    .spread(function (user, created) {
-        //        console.log(user.get({
-        //            plain: true
-        //        }));
-        //        console.log(created);
-        //        return cb(null, user);
-        //    });
-    }
-));
+
+//passport.use(new GoogleStrategy({
+//        clientID: "208268578819-cb8dh3s8kmbovano2mino11ecadtocgt.apps.googleusercontent.com",
+//        clientSecret: "SltsvprFHefAMuiJgjddUhxU",
+//        callbackURL: "http://localhost:6001/auth/google/callback"
+//    },
+//    function (accessToken, refreshToken, profile, cb) {
+//        //console.log(profile);
+//        return cb(null, profile);
+//        //User
+//        //    .findOrCreate({where: {google_id: profile.id, name: profile.displayName, prof: false}, defaults: {}})
+//        //    .spread(function (user, created) {
+//        //        console.log(user.get({
+//        //            plain: true
+//        //        }));
+//        //        console.log(created);
+//        //        return cb(null, user);
+//        //    });
+//    }
+//));
 
 
 // Configure Passport authenticated session persistence.
@@ -102,9 +114,16 @@ passport.use(new GoogleStrategy({
 // from the database when deserializing.  However, due to the fact that this
 // example does not have a database, the complete Twitter profile is serialized
 // and deserialized.
-passport.serializeUser(function (user, cb) {
-    cb(null, user);
+passport.serializeUser(function(user, cb) {
+    cb(null, user.id);
 });
+
+//passport.deserializeUser(function(id, cb) {
+//    User.findById(id, function (err, user) {
+//        if (err) { return cb(err); }
+//        cb(null, user);
+//    });
+//});
 
 passport.deserializeUser(function (obj, cb) {
     cb(null, obj);
@@ -149,7 +168,11 @@ app.get('/',
 app.post('/login',
     passport.authenticate('local', { failureRedirect: '/login' }),
     function(req, res) {
-        res.redirect('/');
+        //console.log(req.user);
+        if (!req.user.prof)
+            res.redirect('/student');
+        else
+            res.redirect('/professor');
     });
 //
 //app.get('/login',
@@ -180,12 +203,13 @@ app.get('/profile',
 app.get('/student',
     require('connect-ensure-login').ensureLoggedIn(),
     function (req, res) {
+        console.log(req.user);
         res.render('student', {user: req.user, slideNum: 2, session_id: 1});
     });
 
 
 app.post('/send_feedback',
-    require('connect-ensure-login').ensureLoggedIn(),
+    //require('connect-ensure-login').ensureLoggedIn(),
     function (req, res) {
         var obj = {};
         //console.log(req.body);

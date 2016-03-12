@@ -9,11 +9,25 @@
         <td style= "width:30%;">
             <img class = "newappIcon" src="/static/images/newapp-icon.png">
         <td>
-            <% if (!user) { %>
-            <p>Welcome! Please <a href="/login">log in</a>.</p>
-            <% } else { %>
-            <p>Hello, <%= user.username %>. View your <a href="/profile">profile</a>.</p>
-            <% } %>
+            <!--<% if (!user) { %>-->
+            <!--<p>Welcome! Please <a href="/login">log in</a>.</p>-->
+            <!--<% } else { %>-->
+            <!--<p>Hello, <%= user.username %>. View your <a href="/profile">profile</a>.</p>-->
+            <!--<% } %>-->
+            <form action="/login" method="post">
+                <div>
+                    <label>Username:</label>
+                    <input type="text" name="username"/><br/>
+                </div>
+                <div>
+                    <label>Password:</label>
+                    <input type="password" name="password"/>
+                </div>
+                <div>
+                    <input type="submit" value="Submit"/>
+                </div>
+            </form>
+
             <!--<td>-->
             <!--<h1>Hi Amri!</h1>-->
             <!--<p>Thanks for creating SlideBack project here.-->
