@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<% include head.ejs %>
+<body>
+<table>
+    <tr>
+        <td style="width:30%;">
+            <label for="vote">How much do you understood slide number (<%= slideNum %>): </label><input id="vote"
+                                                                                                        type="text">
+            <label for="comment">Any comment for slide number (<%= slideNum %>)? </label><input id="comment"
+                                                                                                type="text">
+            <button type="button" class="btn btn-primary" id="send-vote">Send</button>
+        <td>
+</table>
+<script type="text/javascript">
+    $('#send-vote').on('click', function (event) {
+        var vote = $("#vote").val();
+        var comment = $("#comment").val();
+        var user_id = '<%= user.id %>';
+        var data = {};
+        data.vote = vote;
+        data.comment = comment;
+        data.session_id = '<%= session_id %>';
+        data.slide_num = '<%= slideNum %>';
+        data.user_id = '<%= user.id %>';
+        $.ajax({
+            async: false,
+            type: 'POST',
+            url: "http://localhost:6001/send_feedback",
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function (r) {
+                alert('The vote is successfully sent.');
+                $("#vote").val('');
+                $("#comment").val('');
+//                BootstrapDialog.alert({
+//                    title: 'SUCCESS',
+//                    message: '<h4>The vote is successfully sent.</h4>',
+//                    type: BootstrapDialog.TYPE_SUCCESS,
+//                    closable: true,
+//                    draggable: true
+//                });
+            }
+        });
+    });
+
+</script>
+</body>
+</html>
