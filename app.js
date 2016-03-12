@@ -11,8 +11,8 @@ var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 var Sequelize = require('sequelize')
-    , sequelize = new Sequelize('hack', 'postgres', '1111', {
-    hostname: "localhost",
+    , sequelize = new Sequelize('postgres', 'postgres', '1234', {
+    hostname: "us-cdbr-iron-east-03.cleardb.net",
     dialect: "postgres",
     port: 5432
 });
