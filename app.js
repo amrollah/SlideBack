@@ -68,6 +68,7 @@ passport.use(new GoogleStrategy({
         User.findOrCreate({ google_id: profile.id }, function (err, user) {
             return cb(err, user);
         });
+
     }
 ));
 
@@ -132,7 +133,7 @@ app.set('view engine', 'ejs');
 app.use(require('morgan')('combined'));
 app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
-app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
+app.use(require('express-session')({ secret: 'keyboard cat', resave: false, saveUninitialized: false }));
 
 // Initialize Passport and restore authentication state, if any, from the
 // session.
@@ -146,10 +147,16 @@ app.get('/',
         res.render('home', { user: req.user });
     });
 
-app.get('/login',
-    function(req, res){
-        res.render('login');
+app.post('/login',
+    passport.authenticate('local', { failureRedirect: '/login' }),
+    function(req, res) {
+        res.redirect('/');
     });
+//
+//app.get('/login',
+//    function (req, res) {
+//        res.render('login');
+//    });
 
 app.get('/auth/google', function(request, response, next) {
     passport.authenticate('google', {scope: ['profile', 'email']})(request, response, next);
@@ -171,6 +178,28 @@ app.get('/professor',
         res.render('professor', { user: req.user });
     });
 
+app.get('/student',
+    require('connect-ensure-login').ensureLoggedIn(),
+    function (req, res) {
+        res.render('student', {user: req.user, slideNum: 2, session_id: 1});
+    });
+
+
+app.post('/send_feedback',
+    require('connect-ensure-login').ensureLoggedIn(),
+    function (req, res) {
+        var obj = {};
+        //console.log(req.body);
+        console.log('vote ' + req.body.vote + ' for slide ' + req.body.slide_num + ' on session ' + req.body.session_id);
+        res.status(200).send({ success: true });
+        //res.render('student', {user: req.user, slideNum: 2});
+    });
+
+app.get('/logout',
+    function(req, res){
+        req.logout();
+        res.redirect('/');
+    });
 
 // start server on the specified port and binding host
 app.listen(appEnv.port, '0.0.0.0', function() {

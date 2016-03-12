@@ -13,7 +13,9 @@
         <td>
 </table>
 <script type="text/javascript">
-    $('#send-vote').on('click', function (event) {
+    $(function(){
+    $('#send-vote').on('click', function (e) {
+        e.preventDefault();
         var vote = $("#vote").val();
         var comment = $("#comment").val();
         var user_id = '<%= user.id %>';
@@ -24,26 +26,26 @@
         data.slide_num = '<%= slideNum %>';
         data.user_id = '<%= user.id %>';
         $.ajax({
-            async: false,
+            async: true,
             type: 'POST',
             url: "http://localhost:6001/send_feedback",
-            data: JSON.stringify(data),
-            contentType: 'application/json',
+            data: data,
+            dataType: "json",
             success: function (r) {
-                alert('The vote is successfully sent.');
+//                alert('The vote is successfully sent.');
                 $("#vote").val('');
                 $("#comment").val('');
-//                BootstrapDialog.alert({
-//                    title: 'SUCCESS',
-//                    message: '<h4>The vote is successfully sent.</h4>',
-//                    type: BootstrapDialog.TYPE_SUCCESS,
-//                    closable: true,
-//                    draggable: true
-//                });
+                BootstrapDialog.alert({
+                    title: 'SUCCESS',
+                    message: '<h4>The vote is successfully sent.</h4>',
+                    type: BootstrapDialog.TYPE_SUCCESS,
+                    closable: true,
+                    draggable: true
+                });
             }
         });
     });
-
+    });
 </script>
 </body>
 </html>
