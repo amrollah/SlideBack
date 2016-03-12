@@ -79,16 +79,16 @@ passport.use(new GoogleStrategy({
     },
     function (accessToken, refreshToken, profile, cb) {
         //console.log(profile);
-        //return cb(null, profile);
-        User
-            .findOrCreate({where: {google_id: profile.id, name: profile.displayName, prof: false}, defaults: {}})
-            .spread(function (user, created) {
-                console.log(user.get({
-                    plain: true
-                }));
-                console.log(created);
-                return cb(null, user);
-            });
+        return cb(null, profile);
+        //User
+        //    .findOrCreate({where: {google_id: profile.id, name: profile.displayName, prof: false}, defaults: {}})
+        //    .spread(function (user, created) {
+        //        console.log(user.get({
+        //            plain: true
+        //        }));
+        //        console.log(created);
+        //        return cb(null, user);
+        //    });
     }
 ));
 
@@ -131,8 +131,8 @@ app.set('view engine', 'ejs');
 // logging, parsing, and session handling.
 app.use(require('morgan')('combined'));
 app.use(require('cookie-parser')());
-app.use(require('body-parser').urlencoded({extended: true}));
-app.use(require('express-session')({secret: 'keyboard cat', resave: true, saveUninitialized: true}));
+app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(require('express-session')({ secret: 'keyboard cat', resave: false, saveUninitialized: false }));
 
 // Initialize Passport and restore authentication state, if any, from the
 // session.
@@ -146,10 +146,16 @@ app.get('/',
         res.render('home', {user: req.user});
     });
 
-app.get('/login',
-    function (req, res) {
-        res.render('login');
+app.post('/login',
+    passport.authenticate('local', { failureRedirect: '/login' }),
+    function(req, res) {
+        res.redirect('/');
     });
+//
+//app.get('/login',
+//    function (req, res) {
+//        res.render('login');
+//    });
 
 app.get('/auth/google', function (request, response, next) {
     passport.authenticate('google', {scope: ['profile', 'email']})(request, response, next);
@@ -182,10 +188,16 @@ app.post('/send_feedback',
     require('connect-ensure-login').ensureLoggedIn(),
     function (req, res) {
         var obj = {};
-        console.log(req);
-        console.log('vote ' + req.vote + ' for slide ' + req.slideNum + ' on session ' + req.session_id);
-        res.send(1);
+        //console.log(req.body);
+        console.log('vote ' + req.body.vote + ' for slide ' + req.body.slide_num + ' on session ' + req.body.session_id);
+        res.status(200).send({ success: true });
         //res.render('student', {user: req.user, slideNum: 2});
+    });
+
+app.get('/logout',
+    function(req, res){
+        req.logout();
+        res.redirect('/');
     });
 
 // start server on the specified port and binding host
