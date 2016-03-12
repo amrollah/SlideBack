@@ -11,10 +11,10 @@ var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 var Sequelize = require('sequelize')
-    , sequelize = new Sequelize('ad_73efeb8ca694c96', 'ba816c286af1f3', 'b1f50065', {
+    , sequelize = new Sequelize('postgres', 'postgres', '1234', {
     hostname: "us-cdbr-iron-east-03.cleardb.net",
-    dialect: "mysql",
-    port:    3306
+    dialect: "postgres",
+    port:    5432
 });
 
 var User = sequelize.define('User', {
