@@ -175,6 +175,28 @@ var cfenv = require('cfenv');
 // create a new express server
 var app = express();
 
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+server.listen(80);
+io.on('connection', function (socket) {
+    socket.emit('news', { hello: 'world' });
+    socket.on('my other event', function (data) {
+        console.log(data);
+    });
+});
+
+//io.on('connection', function (socket) {
+//    io.emit('this', { will: 'be received by everyone'});
+//
+//    socket.on('private message', function (from, msg) {
+//        console.log('I received a private message by ', from, ' saying ', msg);
+//    });
+//
+//    socket.on('disconnect', function () {
+//        io.emit('user disconnected');
+//    });
+//});
+
 // serve the files out of ./public as our main files
 app.use('/static', express.static('public'));
 
