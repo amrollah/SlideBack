@@ -11,33 +11,42 @@ var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 var Sequelize = require('sequelize')
-    , sequelize = new Sequelize('ad_73efeb8ca694c96', 'ba816c286af1f3', 'b1f50065', {
-    hostname: "us-cdbr-iron-east-03.cleardb.net",
-    dialect: "mysql",
-    port:    3306
+    , sequelize = new Sequelize('hack', 'postgres', '1111', {
+    hostname: "localhost",
+    dialect: "postgres",
+    port:    5432
 });
 
 var User = sequelize.define('User', {
     //id: Sequelize.INTEGER,
     google_id: Sequelize.STRING,
-    name: Sequelize.STRING
+    name: Sequelize.STRING,
+    prof: Sequelize.BOOLEAN
 });
 
-sequelize
-    .sync({ force: true })
-    .then(function(err) {
-        console.log('It worked!');
-    }, function (err) {
-        console.log('An error occurred while creating the table:', err);
-    });
+//User.create({
+//    google_id: 'John',
+//    name: 'Hancock',
+//    prof: true
+//});
 
+//User.sync({force: true}).then(function () {
+//    // Table created
+//    return User.create({
+//        google_id: 'John',
+//        name: 'Hancock'
+//    });
+//});
 
-User.create({
-        google_id: 'sdepold',
-        name: 'Amrollah'
-}).then(function(user) {});
-
-
+//sequelize
+//    .sync({ force: true })
+//    .then(function(err) {
+//        console.log('It worked!');
+//    }, function (err) {
+//        console.log('An error occurred while creating the table:', err);
+//    });
+//
+//
 //sequelize.sync().then(function() {
 //    User.create({
 //        google_id: 'sdepold',
@@ -49,16 +58,16 @@ User.create({
 
 
 passport.use(new GoogleStrategy({
-      clientID: "208268578819-cb8dh3s8kmbovano2mino11ecadtocgt.apps.googleusercontent.com",
-      clientSecret: "SltsvprFHefAMuiJgjddUhxU",
-      callbackURL: "https://starthack.eu-gb.mybluemix.net/auth/google/callback"
+        clientID: "208268578819-cb8dh3s8kmbovano2mino11ecadtocgt.apps.googleusercontent.com",
+        clientSecret: "SltsvprFHefAMuiJgjddUhxU",
+        callbackURL: "https://starthack.eu-gb.mybluemix.net/auth/google/callback"
     },
     function(accessToken, refreshToken, profile, cb) {
         //console.log(cb);
-        return cb(null, profile);
-      //User.findOrCreate({ googleId: profile.id }, function (err, user) {
-      //  return cb(err, user);
-      //});
+        //return cb(null, profile);
+        User.findOrCreate({ google_id: profile.id }, function (err, user) {
+            return cb(err, user);
+        });
     }
 ));
 
@@ -94,11 +103,11 @@ passport.use(new GoogleStrategy({
 // example does not have a database, the complete Twitter profile is serialized
 // and deserialized.
 passport.serializeUser(function(user, cb) {
-  cb(null, user);
+    cb(null, user);
 });
 
 passport.deserializeUser(function(obj, cb) {
-  cb(null, obj);
+    cb(null, obj);
 });
 
 // cfenv provides access to your Cloud Foundry environment
@@ -134,18 +143,18 @@ app.use(passport.session());
 // Define routes.
 app.get('/',
     function(req, res) {
-      res.render('home', { user: req.user });
+        res.render('home', { user: req.user });
     });
 
 app.get('/login',
     function(req, res){
-      res.render('login');
+        res.render('login');
     });
 
 app.get('/auth/google', function(request, response, next) {
     passport.authenticate('google', {scope: ['profile', 'email']})(request, response, next);
 });
-    //passport.authenticate('google', { scope: ['profile'] }));
+//passport.authenticate('google', { scope: ['profile'] }));
 
 app.get('/auth/google/callback',
     passport.authenticate('google', {successRedirect: '/profile', failureRedirect: '/login' })
@@ -159,13 +168,13 @@ app.get('/auth/google/callback',
 app.get('/profile',
     require('connect-ensure-login').ensureLoggedIn(),
     function(req, res){
-      res.render('profile', { user: req.user });
+        res.render('profile', { user: req.user });
     });
 
 
 // start server on the specified port and binding host
 app.listen(appEnv.port, '0.0.0.0', function() {
 
-	// print a message when the server starts listening
-  console.log("server starting on " + appEnv.url);
+    // print a message when the server starts listening
+    console.log("server starting on " + appEnv.url);
 });
