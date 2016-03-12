@@ -14,40 +14,14 @@ var Sequelize = require('sequelize')
     , sequelize = new Sequelize('postgres', 'postgres', '1234', {
     hostname: "us-cdbr-iron-east-03.cleardb.net",
     dialect: "postgres",
-    port: 5432
+    port:    5432
 });
 
 var User = sequelize.define('User', {
+    //id: Sequelize.INTEGER,
     google_id: Sequelize.STRING,
     name: Sequelize.STRING,
     prof: Sequelize.BOOLEAN
-});
-
-var Session = sequelize.define('Session', {
-    file: Sequelize.STRING,
-    passcode: Sequelize.STRING
-});
-
-var Feedback = sequelize.define('Feedback', {
-    vote: Sequelize.INTEGER,
-    comment: Sequelize.STRING,
-    user_id: {
-        type: Sequelize.INTEGER,
-        references: {
-            model: User,
-            key: 'id',
-            deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
-        }
-    },
-    session_id: {
-        type: Sequelize.INTEGER,
-        references: {
-            model: Session,
-            key: 'id',
-            // This declares when to check the foreign key constraint. PostgreSQL only.
-            deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
-        }
-    }
 });
 
 //User.create({
@@ -56,12 +30,14 @@ var Feedback = sequelize.define('Feedback', {
 //    prof: true
 //});
 
-//Session.create({
-//    file: 'test.pdf',
-//    passcode: '1'
+//User.sync({force: true}).then(function () {
+//    // Table created
+//    return User.create({
+//        google_id: 'John',
+//        name: 'Hancock'
+//    });
 //});
 
-// JUST run this once to create the db tables
 //sequelize
 //    .sync({ force: true })
 //    .then(function(err) {
@@ -69,29 +45,53 @@ var Feedback = sequelize.define('Feedback', {
 //    }, function (err) {
 //        console.log('An error occurred while creating the table:', err);
 //    });
-
+//
+//
+//sequelize.sync().then(function() {
+//    User.create({
+//        google_id: 'sdepold',
+//        name: 'Amrollah'
+//    }, function(err) {
+//        console.log("DB error")
+//    })
+//});
 
 
 passport.use(new GoogleStrategy({
         clientID: "208268578819-cb8dh3s8kmbovano2mino11ecadtocgt.apps.googleusercontent.com",
         clientSecret: "SltsvprFHefAMuiJgjddUhxU",
-        callbackURL: "http://localhost:6001/auth/google/callback"
+        callbackURL: "https://starthack.eu-gb.mybluemix.net/auth/google/callback"
     },
-    function (accessToken, refreshToken, profile, cb) {
-        //console.log(profile);
+    function(accessToken, refreshToken, profile, cb) {
+        //console.log(cb);
         //return cb(null, profile);
-        User
-            .findOrCreate({where: {google_id: profile.id, name: profile.displayName, prof: false}, defaults: {}})
-            .spread(function (user, created) {
-                console.log(user.get({
-                    plain: true
-                }));
-                console.log(created);
-                return cb(null, user);
-            });
+        User.findOrCreate({ google_id: profile.id }, function (err, user) {
+            return cb(err, user);
+        });
     }
 ));
 
+//var pg = require('pg');
+//var connectionString = "db2://user05463:iPUlY1Ac5OAl@5.10.125.192:50000/SQLDB";
+//
+//var client = new pg.Client(connectionString);
+//client.connect();
+//var query = client.query('CREATE TABLE sessions(id SERIAL PRIMARY KEY, file VARCHAR(400) not null, active BOOLEAN)');
+//query.on('end', function() { client.end(); });
+
+
+//{
+//    "credentials": {
+//    "hostname": "5.10.125.192",
+//        "password": "iPUlY1Ac5OAl",
+//        "port": 50000,
+//        "host": "5.10.125.192",
+//        "jdbcurl": "jdbc:db2://5.10.125.192:50000/SQLDB",
+//        "uri": "db2://user05463:iPUlY1Ac5OAl@5.10.125.192:50000/SQLDB",
+//        "db": "SQLDB",
+//        "username": "user05463"
+//}
+//}
 
 // Configure Passport authenticated session persistence.
 //
@@ -102,11 +102,11 @@ passport.use(new GoogleStrategy({
 // from the database when deserializing.  However, due to the fact that this
 // example does not have a database, the complete Twitter profile is serialized
 // and deserialized.
-passport.serializeUser(function (user, cb) {
+passport.serializeUser(function(user, cb) {
     cb(null, user);
 });
 
-passport.deserializeUser(function (obj, cb) {
+passport.deserializeUser(function(obj, cb) {
     cb(null, obj);
 });
 
@@ -131,8 +131,8 @@ app.set('view engine', 'ejs');
 // logging, parsing, and session handling.
 app.use(require('morgan')('combined'));
 app.use(require('cookie-parser')());
-app.use(require('body-parser').urlencoded({extended: true}));
-app.use(require('express-session')({secret: 'keyboard cat', resave: true, saveUninitialized: true}));
+app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
 
 // Initialize Passport and restore authentication state, if any, from the
 // session.
@@ -142,22 +142,22 @@ app.use(passport.session());
 
 // Define routes.
 app.get('/',
-    function (req, res) {
-        res.render('home', {user: req.user});
+    function(req, res) {
+        res.render('home', { user: req.user });
     });
 
 app.get('/login',
-    function (req, res) {
+    function(req, res){
         res.render('login');
     });
 
-app.get('/auth/google', function (request, response, next) {
+app.get('/auth/google', function(request, response, next) {
     passport.authenticate('google', {scope: ['profile', 'email']})(request, response, next);
 });
 //passport.authenticate('google', { scope: ['profile'] }));
 
 app.get('/auth/google/callback',
-    passport.authenticate('google', {successRedirect: '/student', failureRedirect: '/login'})
+    passport.authenticate('google', {successRedirect: '/profile', failureRedirect: '/login' })
     //function(req, res) {
     //  // Successful authentication, redirect home.
     //  res.redirect('/');
@@ -165,31 +165,15 @@ app.get('/auth/google/callback',
 );
 
 
-app.get('/profile',
+app.get('/professor',
     require('connect-ensure-login').ensureLoggedIn(),
-    function (req, res) {
-        res.render('profile', {user: req.user});
+    function(req, res){
+        res.render('professor', { user: req.user });
     });
 
-app.get('/student',
-    require('connect-ensure-login').ensureLoggedIn(),
-    function (req, res) {
-        res.render('student', {user: req.user, slideNum: 2, session_id: 1});
-    });
-
-
-app.post('/send_feedback',
-    require('connect-ensure-login').ensureLoggedIn(),
-    function (req, res) {
-        var obj = {};
-        console.log(req);
-        console.log('vote ' + req.vote + ' for slide ' + req.slideNum + ' on session ' + req.session_id);
-        res.send(1);
-        //res.render('student', {user: req.user, slideNum: 2});
-    });
 
 // start server on the specified port and binding host
-app.listen(appEnv.port, '0.0.0.0', function () {
+app.listen(appEnv.port, '0.0.0.0', function() {
 
     // print a message when the server starts listening
     console.log("server starting on " + appEnv.url);
