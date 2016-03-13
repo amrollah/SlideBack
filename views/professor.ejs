@@ -10,10 +10,22 @@
     <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
+<<<<<<< HEAD
     <link href="/static/css/dashboard.css" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="/static/bootstrap/js/prof.js"></script>
 
+=======
+    <link href="../public/css/dashboard.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script>
+      var socket = io.connect('http://localhost');
+      socket.on('news', function (data) {
+        console.log(data);
+        socket.emit('my other event', { my: 'data' });
+      });
+    </script>
+>>>>>>> b75694a50a2a7192107fe1c7a72e76340a7270d5
   </head>
 
   <body>

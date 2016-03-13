@@ -25,10 +25,47 @@ var User = sequelize.define('User', {
     prof: Sequelize.BOOLEAN
 });
 
+
 User.create({
    username: 'prof',
    prof: true
 });
+var Session = sequelize.define('Session', {
+    file: Sequelize.STRING,
+    passcode: Sequelize.STRING
+});
+
+var Feedback = sequelize.define('Feedback', {
+    vote: Sequelize.INTEGER,
+    comment: Sequelize.STRING,
+    page: Sequelize.INTEGER,
+    user_id: {
+        type: Sequelize.INTEGER,
+        references: {
+            model: User,
+            key: 'id',
+            deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+        }
+    },
+    session_id: {
+        type: Sequelize.INTEGER,
+        references: {
+            model: Session,
+            key: 'id',
+            // This declares when to check the foreign key constraint. PostgreSQL only.
+            deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+        }
+    }
+});
+
+//User.create({
+//    username: 'prof',
+//    prof: true
+//});
+//Session.create({
+//    file: 'test.pdf',
+//    passcode: '1'
+//});
 
 //User.sync({force: true}).then(function () {
 //    // Table created
@@ -143,6 +180,28 @@ var cfenv = require('cfenv');
 // create a new express server
 var app = express();
 
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+server.listen(80);
+io.on('connection', function (socket) {
+    socket.emit('news', { hello: 'world' });
+    socket.on('my other event', function (data) {
+        console.log(data);
+    });
+});
+
+//io.on('connection', function (socket) {
+//    io.emit('this', { will: 'be received by everyone'});
+//
+//    socket.on('private message', function (from, msg) {
+//        console.log('I received a private message by ', from, ' saying ', msg);
+//    });
+//
+//    socket.on('disconnect', function () {
+//        io.emit('user disconnected');
+//    });
+//});
+
 // serve the files out of ./public as our main files
 app.use('/static', express.static('public'));
 
@@ -219,10 +278,15 @@ app.post('/send_feedback',
     //require('connect-ensure-login').ensureLoggedIn(),
     function (req, res) {
         var obj = {};
-        //console.log(req.body);
+        Feedback.create({
+            vote: req.body.vote,
+            comment: req.body.comment,
+            page: req.body.slide_num,
+            user_id: req.body.slide_num,
+            session_id: req.body.session_id
+        });
         console.log('vote ' + req.body.vote + ' for slide ' + req.body.slide_num + ' on session ' + req.body.session_id);
         res.status(200).send({ success: true });
-        //res.render('student', {user: req.user, slideNum: 2});
     });
 
 app.get('/logout',
