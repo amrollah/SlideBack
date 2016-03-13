@@ -10,7 +10,9 @@
     <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="../public/css/dashboard.css" rel="stylesheet">
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="/static/bootstrap/js/prof.js"></script>
 
   </head>
 
@@ -33,8 +35,12 @@
 
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-4 col-sm-offset-8 col-md-3 col-md-offset-9 sidebar">
-          <p> ADD CHART HERE </p>
+        <div class="col-md-9 main">
+          <h2> Computer Networks </h2>
+          <iframe src="http://cnds.eecs.jacobs-university.de/courses/cn-2013/slides.pdf" style="width:100%; height:800px;" frameborder="0"></iframe>
+        </div>
+        <div class="col-md-3 col-md-offset-9 sidebar">
+          <div id="tester" style="width:90%;height:250px;"></div>
           <div class="dropdown">
             <button class="btn btn-primary dropdown-toggle" id="menu1" type="button" data-toggle="dropdown">Analysis type
             <span class="caret"></span></button>
@@ -59,14 +65,11 @@
                 <tr>
                   <td>1</td>
                   <td>32</td>
-                  <td>wow</td>
+                  <td>Not clear on what is Internet Protocol</td>
                 </tr>
               </tbody>
             </table>
           </div>
-
-        </div>
-        <div class="col-sm-8 col-md-9 main">
 
         </div>
       </div>

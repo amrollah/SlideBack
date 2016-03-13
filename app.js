@@ -12,7 +12,7 @@ var passport = require('passport');
 var Strategy = require('passport-local').Strategy;
 
 var Sequelize = require('sequelize')
-    , sequelize = new Sequelize('hack', 'postgres', '1111', {
+    , sequelize = new Sequelize('postgres', 'postgres', '1234', {
     hostname: "localhost",
     dialect: "postgres",
     port:    5432
@@ -25,10 +25,10 @@ var User = sequelize.define('User', {
     prof: Sequelize.BOOLEAN
 });
 
-//User.create({
-//    username: 'prof',
-//    prof: true
-//});
+User.create({
+   username: 'prof',
+   prof: true
+});
 
 //User.sync({force: true}).then(function () {
 //    // Table created
@@ -39,7 +39,7 @@ var User = sequelize.define('User', {
 //});
 
 // JUST run this once to create the db tables
-//sequelize
+// sequelize
 //    .sync({ force: true })
 //    .then(function(err) {
 //        console.log('jhjh');
